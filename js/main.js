@@ -12,59 +12,85 @@ class Prendas
 }
 
 const prendas1 = new Prendas(1, "Remera overzise", "S", 7, 2800)
-const prendas2 = new Prendas(2, "Remera", "M", 6, 3000)
+const prendas2 = new Prendas(2, "Pantalon", "M", 6, 3000)
 
-const arrayPrendas = [prendas1,prendas2];
+let arrayPrendas = [];
 
-menuCompras()
-
-function menuCompras()
+if(localStorage.getItem("arrayPrendas"))
 {
-    let opcion=0
-    while(opcion!==6)
-    {
-        opcion = Number(prompt(`Elija una opcion:
-                                     1.Agregar Prenda
-                                     2.Eliminar Prenda
-                                     3.Modificar Prenda
-                                     4.Inventario
-                                     5.Buscar Prenda
-                                     6.Salir`));
-        
-        switch(opcion)
-        {
-            case 1:
-                {
-                    agregarPrenda();
-                    break;
-                }
-            case 2:
-                {
-                    eliminarPrenda();
-                    break;
-                }
-            case 3:
-                {
-                    modificarPrenda();
-                    break;
-                }
-            case 4:
-                {
-                    inventario();
-                    break;
-                }
-            case 5:
-                {
-                    buscarPrenda();
-                    break;
-                }
-            default:{
-                alert("Opcion invalida");
-                break;
-            }
-        }                             
-    }
+    arrayPrendas = JSON.parse(localStorage.getItem("arrayPrendas"));
 }
+else{
+    arrayPrendas = [prendas1,prendas2];
+}
+
+console.log("array", arrayPrendas);
+
+
+
+
+iniciarApp();
+
+function iniciarApp()
+{
+    const tituloH1 = document.createElement("h1")
+    tituloH1.innerHTML= "SISTEMA DE INVENTARIO";
+    document.body.appendChild(tituloH1);
+
+    const tituloH2 = document.createElement("h2");
+    tituloH2.innerHTML= "Aqui se veran los resultados";
+    document.body.appendChild(tituloH2);
+
+
+}
+
+botones();
+
+function botones()
+{
+    let opciones = ["Inventario", "Agregar Prenda", "Buscar Prenda"]
+    opciones.forEach((opcion)=>{
+
+    const boton = document.createElement("button");
+
+    if(opcion === "Inventario")
+    {
+        boton.addEventListener("click", ()=>{
+            inventario(arrayPrendas);
+        })
+    }
+
+    else if(opcion === "Agregar Prenda")
+    {
+        boton.addEventListener("click", ()=>{
+            agregarPrenda();
+            inventario(arrayPrendas);
+
+        })
+    }
+
+    else if(opcion === "Buscar Prenda")
+    {
+        boton.addEventListener("click", ()=>{
+            let filtrado = buscarPrenda();
+
+            inventario(filtrado);
+        })
+    }
+
+    boton.innerHTML=opcion;
+    document.body.appendChild(boton);
+    });
+
+
+
+
+
+
+
+}
+
+
 
 
 function agregarPrenda()
@@ -82,14 +108,33 @@ function agregarPrenda()
     let articulos = new Prendas(id,prenda,talle,cantidad,precio);
     arrayPrendas.push(articulos);
 
+
+    localStorage.setItem("prendas", JSON.stringify(arrayPrendas));
+
 }
 
-function inventario()
+function inventario(buscar)
 {
-    console.log("INVENTARIO");
-    arrayPrendas.forEach((prendas)=>{
-        console.log(prendas);
-    })
+    let inventario = document.querySelector("#inventarioPrendas");
+    if(!inventario)
+    {
+        inventario = document.createElement("ul");
+        inventario.setAttribute("id", "inventarioPrendas");
+    }
+    inventario.innerHTML="";
+
+    
+
+    buscar.forEach((prenda) =>{
+        const nodoli = document.createElement("li");
+        nodoli.innerHTML=`Prenda: ${prenda.prenda} - Talle: ${prenda.talle} - Precio: $${prenda.precio}`;
+
+        inventario.appendChild(nodoli);
+    });
+
+    document.body.appendChild(inventario);
+
+
 }
 
 function eliminarPrenda()
@@ -116,7 +161,10 @@ function buscarPrenda()
     let nombre= prompt("INGRESE LA PRENDA QUE DESEA BUSCAR");
 
     let encontrados = arrayPrendas.filter((articulo)=>articulo.prenda.toLowerCase().indexOf(nombre.toLowerCase())!==-1);
-    console.log("BUSCAR USUARIOS:", encontrados);
+    
+    return encontrados;
+
+
 }
 
 function modificarPrenda()
@@ -144,3 +192,4 @@ function modificarPrenda()
         alert("PRENDA NO EXISTENTE")
     }
 }
+
